@@ -1,3 +1,3 @@
-import { Order } from 'src/order/order.model';
+import { Order } from 'src/order/order.schema';
 
 export interface Orders extends Array<Order> {}
