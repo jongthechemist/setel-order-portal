@@ -1,5 +1,3 @@
-import { OrderStatus } from 'src/status/status.enum';
-
 export class CreateOrderDto {
   readonly items: { itemId: String, price: Number }[];
   readonly createdDate: Date;
@@ -7,6 +5,7 @@ export class CreateOrderDto {
   readonly createdById: String;
 }
 
-export class UpdateOrderDto {
-  readonly status: OrderStatus;
+export class OrderStatusDto {
+  readonly status: String;
 }
+

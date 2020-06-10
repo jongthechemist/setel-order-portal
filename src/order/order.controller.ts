@@ -4,22 +4,22 @@ import {
   Param,
   Post,
   Body,
-  Patch,
   HttpException,
   HttpStatus,
   Query,
   Req,
   Res,
   Logger,
+  Put,
 } from '@nestjs/common';
-import { CreateOrderDto, UpdateOrderDto } from './order.dto';
+import { CreateOrderDto, OrderStatusDto } from './order.dto';
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
 import { PaymentService } from 'src/payment/payment.service';
-import { PaymentStatus, OrderStatus } from 'src/status/status.enum';
 import { DeliveryService } from 'src/delivery/delivery.service';
 import { PollingService } from 'src/polling/polling.service';
 import { Request, Response } from 'express';
+import { OrderStatus } from 'src/status/status.enum';
 
 const logger = new Logger('OrderController');
 @Controller('order')
@@ -43,61 +43,69 @@ export class OrderController {
     const paymentResponse = await this.paymentService.create(createdOrder.uuid);
     logger.log('Payment created');
 
-    if (paymentResponse && paymentResponse.status === PaymentStatus.Confirmed) {
+    const updateStatus = async (orderStatus: OrderStatus) => {
+      createdOrder = await this.orderService.updateStatus(
+        createdOrder.uuid,
+        orderStatus,
+      );
+      this.pollingService.publish(
+        `order:status:${createdOrder.uuid}`,
+        createdOrder,
+      );
+      logger.log('Order status updated to ' + createdOrder.status);
+    };
+
+    if (paymentResponse && paymentResponse.status === 'CONFIRMED') {
       logger.log('Payment successful');
-      createdOrder = await this.orderService.update(createdOrder.uuid, {
-        status: OrderStatus.Confirmed,
-      });
-      this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
-      logger.log('Order status updated to CONFIRMED');
+      updateStatus('CONFIRMED');
 
       const deliveryResult = await this.deliveryService.create(
         createdOrder.uuid,
       );
-      createdOrder = await this.orderService.update(createdOrder.uuid, {
-        status: deliveryResult ? OrderStatus.Delivered : OrderStatus.Cancelled,
-      });
-      this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
-      logger.log('Order status updated to DELIVERED');
-
+      if (deliveryResult) {
+        logger.log('Delivery successful');
+        updateStatus('DELIVERED');
+      }
     } else {
       logger.log('Payment declined');
-      createdOrder = await this.orderService.update(createdOrder.uuid, {
-        status: OrderStatus.Cancelled,
-      });
-      this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
-      logger.log('Order status updated to CANCELLED');
+      updateStatus('CANCELLED');
     }
   }
 
   @Get(':id')
-  async getOrder(
+  async getOrder(@Param('id') orderUuid: String): Promise<Order> {
+    let order = await this.orderService.find(orderUuid);
+    if (order === null) {
+      throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);
+    }
+    return order;
+  }
+
+  @Put(':id/cancel')
+  async cancelOrder(@Param('id') orderUuid: String): Promise<Order> {
+    let order = await this.orderService.updateStatus(orderUuid, 'CANCELLED');
+    return order;
+  }
+
+  @Get(':id/status')
+  async getStatus(
     @Param('id') orderUuid: String,
     @Query('polling') polling: 'true' | 'false',
     @Req() request: Request,
-    @Res() response: Response,
+    @Res() response: Response<OrderStatusDto>,
   ): Promise<void> {
     let order = await this.orderService.find(orderUuid);
     if (polling === 'true') {
-      this.pollingService.subscribe(`order:${orderUuid}`, request, response);
+      this.pollingService.subscribe(
+        `order:status:${orderUuid}`,
+        request,
+        response,
+      );
     } else {
       if (order === null) {
         throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);
       }
-      response.send(order);
+      response.send({ status: order.status });
     }
-  }
-
-  @Patch(':id')
-  async updateOrder(
-    @Param('id') orderUuid: string,
-    @Body() body: UpdateOrderDto,
-  ): Promise<Order> {
-    let order = await this.orderService.update(orderUuid, body);
-    if (order === null) {
-      throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);
-    }
-    this.pollingService.publish(`order:${orderUuid}`, order);
-    return order;
   }
 }

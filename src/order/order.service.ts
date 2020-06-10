@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Order } from './order.schema';
-import { CreateOrderDto, UpdateOrderDto } from './order.dto';
+import { CreateOrderDto } from './order.dto';
 import { generateUuid } from 'src/helpers/uuid';
 import { OrderStatus } from 'src/status/status.enum';
 
@@ -14,9 +14,9 @@ export class OrderService {
 
   async create(order: CreateOrderDto): Promise<Order> {
     const createdOrder = new this.orderModel(order);
-    createdOrder.set('uuid', generateUuid());
-    createdOrder.set('status', OrderStatus.Created);
-    return createdOrder.save();
+    createdOrder.uuid = generateUuid();
+    createdOrder.status = 'CREATED';
+    return createdOrder.save({ validateBeforeSave: true });
   }
 
   async find(orderUuid: String): Promise<Order> {
@@ -24,14 +24,12 @@ export class OrderService {
     return foundOrder;
   }
 
-  async update(orderUuid: String, newValues: UpdateOrderDto): Promise<Order> {
+  async updateStatus(orderUuid: String, status: OrderStatus): Promise<Order> {
     const order = await this.find(orderUuid);
     if (order === null) {
       return null;
     }
-    for (let key in newValues) {
-      order[key] = newValues[key];
-    }
+    order.status = status;
     await order.save({ validateBeforeSave: true });
     return order;
   }

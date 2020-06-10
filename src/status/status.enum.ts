@@ -1,11 +1,3 @@
-export enum OrderStatus {
-  Created = 'CREATED',
-  Confirmed = 'CONFIRMED',
-  Delivered = 'DELIVERED',
-  Cancelled = 'CANCELLED'
-}
+export type OrderStatus = 'CREATED' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
 
-export enum PaymentStatus {
-  Confirmed = 'CONFIRMED',
-  Declined = 'DECLINED'
-}
+export type PaymentStatus = 'CONFIRMED' | 'DECLINED';
