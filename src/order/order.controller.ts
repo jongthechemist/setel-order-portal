@@ -10,6 +10,7 @@ import {
   Query,
   Req,
   Res,
+  Logger,
 } from '@nestjs/common';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { OrderService } from './order.service';
@@ -20,6 +21,7 @@ import { DeliveryService } from 'src/delivery/delivery.service';
 import { PollingService } from 'src/polling/polling.service';
 import { Request, Response } from 'express';
 
+const logger = new Logger('OrderController');
 @Controller('order')
 export class OrderController {
   constructor(
@@ -32,18 +34,22 @@ export class OrderController {
   @Post()
   async createOrder(
     @Body() order: CreateOrderDto,
-    @Req() request: Request,
     @Res() response: Response,
   ): Promise<void> {
     let createdOrder = await this.orderService.create(order);
     response.send(createdOrder);
+    logger.log('Order created');
 
     const paymentResponse = await this.paymentService.create(createdOrder.uuid);
+    logger.log('Payment created');
+
     if (paymentResponse && paymentResponse.status === PaymentStatus.Confirmed) {
+      logger.log('Payment successful');
       createdOrder = await this.orderService.update(createdOrder.uuid, {
         status: OrderStatus.Confirmed,
       });
       this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
+      logger.log('Order status updated to CONFIRMED');
 
       const deliveryResult = await this.deliveryService.create(
         createdOrder.uuid,
@@ -52,12 +58,15 @@ export class OrderController {
         status: deliveryResult ? OrderStatus.Delivered : OrderStatus.Cancelled,
       });
       this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
+      logger.log('Order status updated to DELIVERED');
 
     } else {
+      logger.log('Payment declined');
       createdOrder = await this.orderService.update(createdOrder.uuid, {
         status: OrderStatus.Cancelled,
       });
       this.pollingService.publish(`order:${createdOrder.uuid}`, createdOrder);
+      logger.log('Order status updated to CANCELLED');
     }
   }
 
