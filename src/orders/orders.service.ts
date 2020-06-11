@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Orders } from './orders.schema';
-import { Order } from 'src/order/order.schema';
+import { Order } from '../order/order.schema';
 
 @Injectable()
 export class OrdersService {
@@ -11,7 +11,7 @@ export class OrdersService {
   ) {}
 
   async findAll(): Promise<Orders> {
-    const orders = await this.orderModel.find().exec()
+    const orders = await this.orderModel.find()
     return orders;
   }
 }

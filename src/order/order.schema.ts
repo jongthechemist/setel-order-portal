@@ -17,7 +17,7 @@ export class Order extends Document {
   uuid: String;
 
   @Prop()
-  items: [OrderItem];
+  items: OrderItem[];
   
   @Prop()
   createdDate: Date;
@@ -31,7 +31,7 @@ export class Order extends Document {
   @Prop({
     enum: ['CREATED', 'CONFIRMED', 'DELIVERED', 'CANCELLED']
   })
-  status: String;
+  status: OrderStatus;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

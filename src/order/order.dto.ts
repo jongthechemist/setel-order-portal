@@ -1,11 +1,17 @@
-export class CreateOrderDto {
-  readonly items: { itemId: String, price: Number }[];
-  readonly createdDate: Date;
-  readonly createdBy: String;
-  readonly createdById: String;
-}
+import { OrderStatus } from 'src/status/status.enum';
 
+
+export interface CreateOrderDto {
+  items: { itemId: String, price: Number }[];
+  createdDate: Date;
+  createdBy: String;
+  createdById: String;
+}
+export interface OrderDto extends CreateOrderDto {
+  uuid: String;
+  status: OrderStatus;
+}
 export class OrderStatusDto {
-  readonly status: String;
+  status: String;
 }
 

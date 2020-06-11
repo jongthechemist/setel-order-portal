@@ -2,9 +2,9 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Order } from './order.schema';
-import { CreateOrderDto } from './order.dto';
-import { generateUuid } from 'src/helpers/uuid';
-import { OrderStatus } from 'src/status/status.enum';
+import { CreateOrderDto, OrderDto } from './order.dto';
+import { generateUuid } from '../helpers/uuid';
+import { OrderStatus } from '../status/status.enum';
 
 @Injectable()
 export class OrderService {
@@ -12,25 +12,24 @@ export class OrderService {
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
   ) {}
 
-  async create(order: CreateOrderDto): Promise<Order> {
+  async create(order: CreateOrderDto): Promise<OrderDto> {
     const createdOrder = new this.orderModel(order);
     createdOrder.uuid = generateUuid();
     createdOrder.status = 'CREATED';
     return createdOrder.save({ validateBeforeSave: true });
   }
 
-  async find(orderUuid: String): Promise<Order> {
+  async find(orderUuid: String): Promise<OrderDto> {
     const foundOrder = this.orderModel.findOne({ uuid: orderUuid });
     return foundOrder;
   }
 
-  async updateStatus(orderUuid: String, status: OrderStatus): Promise<Order> {
-    const order = await this.find(orderUuid);
+  async updateStatus(orderUuid: String, status: OrderStatus): Promise<OrderDto> {
+    const order = await this.orderModel.findOne({ uuid: orderUuid });
     if (order === null) {
       return null;
     }
     order.status = status;
-    await order.save({ validateBeforeSave: true });
-    return order;
+    return order.save({ validateBeforeSave: true });
   }
 }

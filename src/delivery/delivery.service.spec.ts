@@ -15,4 +15,11 @@ describe('DeliveryService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should return true or false', async () => {
+    expect.assertions(1);
+    const options = [true, false];
+    const result = await service.create('1234');
+    expect(options).toContain(result);
+  });
 });

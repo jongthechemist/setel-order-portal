@@ -1,19 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { PollingResponse, PollingRequest } from './polling.interface';
 
 @Injectable()
 export class PollingService {
-  private _subscribers: Map<String, Array<Response>>;
+  subscribers: Map<String, Array<PollingResponse<any>>>;
 
   constructor() {
-    this._subscribers = new Map<String, Array<Response>>();
+    this.subscribers = new Map<String, Array<PollingResponse<any>>>();
   }
 
-  subscribe(topic: String, request: Request, response: Response) {
-    let subscribers = this._subscribers.get(topic);
+  subscribe<T>(
+    topic: String,
+    request: PollingRequest,
+    response: PollingResponse<T>,
+  ) {
+    let subscribers = this.subscribers.get(topic);
     if (!subscribers) {
-      subscribers = new Array<Response>();
-      this._subscribers.set(topic, subscribers);
+      subscribers = new Array<PollingResponse<T>>();
+      this.subscribers.set(topic, subscribers);
     }
 
     subscribers.push(response);
@@ -22,14 +26,13 @@ export class PollingService {
     });
   }
 
-  publish(topic: String, body: any) {
-    let subscribers = this._subscribers.get(topic);
+  publish<T>(topic: String, body: T) {
+    let subscribers = this.subscribers.get(topic);
     if (subscribers) {
       for (let subscriber of subscribers) {
         subscriber.send(body);
-        subscriber.end('ok');
       }
-      subscribers = new Array<Response>();
+      subscribers = new Array<PollingResponse<T>>();
     }
   }
 }

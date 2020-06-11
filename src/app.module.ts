@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { OrderModule } from './order/order.module';
 import { OrdersModule } from './orders/orders.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentModule } from './payment/payment.module';
 import { DeliveryModule } from './delivery/delivery.module';
 import { PollingService } from './polling/polling.service';
@@ -12,7 +12,18 @@ import { PollingService } from './polling/polling.service';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(`${process.env.DATABASE_DOMAIN}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (
+        configService: ConfigService,
+      ): MongooseModuleOptions => {
+        const domain = configService.get<string>('DATABASE_DOMAIN');
+        const port = configService.get<string>('DATABASE_PORT');
+        const name = configService.get<string>('DATABASE_NAME');
+        return { uri: `${domain}:${port}/${name}` };
+      },
+      inject: [ConfigService],
+    }),
     OrderModule,
     OrdersModule,
     PaymentModule,

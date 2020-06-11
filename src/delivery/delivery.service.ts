@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { delay } from 'src/helpers/timer';
+import { delay } from '../helpers/timer';
 
 @Injectable()
 export class DeliveryService {

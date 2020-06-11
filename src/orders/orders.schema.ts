@@ -1,3 +1,3 @@
-import { Order } from 'src/order/order.schema';
+import { OrderDto } from 'src/order/order.dto';
 
-export interface Orders extends Array<Order> {}
+export interface Orders extends Array<OrderDto> {}
