@@ -76,6 +76,10 @@ export class OrderController {
   @Put(':id/cancel')
   async cancelOrder(@Param('id') orderUuid: String): Promise<OrderDto> {
     let order = await this.orderService.updateStatus(orderUuid, 'CANCELLED');
+    this.pollingService.publish(`order:status:${order.uuid}`, {
+      status: order.status,
+      canPoll: this.canPoll(order.status)
+    });
     return order;
   }
 
@@ -87,7 +91,7 @@ export class OrderController {
     @Res() response: OrderResponse<OrderStatusDto>,
   ): Promise<void> {
     let order = await this.orderService.find(orderUuid);
-    if (polling === 'true') {
+    if (polling === 'true' && this.canPoll(order.status)) {
       this.pollingService.subscribe(
         `order:status:${orderUuid}`,
         request,

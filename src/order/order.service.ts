@@ -29,7 +29,9 @@ export class OrderService {
     if (order === null) {
       return null;
     }
-    order.status = status;
+    if (order.status !== 'CANCELLED') {
+      order.status = status;
+    }
     return order.save({ validateBeforeSave: true });
   }
 }
