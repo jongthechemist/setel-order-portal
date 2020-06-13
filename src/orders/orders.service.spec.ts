@@ -10,6 +10,9 @@ class MockOrder {
   static find(filter: any): any {
     return [MockOrder.data];
   }
+  static sort(order: any): any {
+    return [MockOrder.data];
+  }
 }
 
 describe('Orders Service', () => {
@@ -39,8 +42,11 @@ describe('Orders Service', () => {
       createdDate: new Date(),
       createdBy: 'Nizam',
       createdById: '1',
-    })
-    const result = await service.findAll()
+    });
+    jest
+      .spyOn(MockOrder, 'find')
+      .mockImplementation(() => ({ sort: MockOrder.sort }));
+    const result = await service.findAll();
     expect(result).toContain(order.data);
-  })
+  });
 });

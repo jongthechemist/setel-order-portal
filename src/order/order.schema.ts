@@ -31,7 +31,7 @@ export class Order extends Document {
   @Prop({
     enum: ['CREATED', 'CONFIRMED', 'DELIVERED', 'CANCELLED']
   })
-  status: OrderStatus;
+  status: String;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

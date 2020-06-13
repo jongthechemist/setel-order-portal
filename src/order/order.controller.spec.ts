@@ -144,14 +144,19 @@ describe('Order Controller', () => {
   it('should return order status', async () => {
     expect.assertions(1);
     await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
-    expect(mockResponse.send).toHaveBeenCalledWith({ status: 'CREATED' });
+    expect(mockResponse.send).toHaveBeenCalledWith({ status: 'CREATED', canPoll: controller.canPoll('CREATED') });
   });
-  
+
   it('should throw error not found on get status if order not found', async () => {
     expect.assertions(2);
     jest.spyOn(orderService, 'find').mockResolvedValue(null);
     try {
-      const order = await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
+      const order = await controller.getStatus(
+        'abcd',
+        'false',
+        mockRequest,
+        mockResponse,
+      );
     } catch (error) {
       expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(HttpStatus.NOT_FOUND);
@@ -167,5 +172,17 @@ describe('Order Controller', () => {
       mockRequest,
       mockResponse,
     );
+  });
+
+  it('should return with canPoll = true if status can be polled', () => {
+    const expectedResults = {
+      CREATED: true,
+      CONFIRMED: true,
+      DELIVERED: false,
+      CANCELLED: false,
+    };
+    for (let status in expectedResults) {
+      expect(controller.canPoll(status)).toBe(expectedResults[status]);
+    }
   });
 });

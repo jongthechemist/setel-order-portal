@@ -11,7 +11,7 @@ export class OrdersService {
   ) {}
 
   async findAll(): Promise<Orders> {
-    const orders = await this.orderModel.find()
+    const orders = await this.orderModel.find().sort({ createdDate: 'desc' })
     return orders;
   }
 }

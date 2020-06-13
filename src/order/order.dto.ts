@@ -9,9 +9,10 @@ export interface CreateOrderDto {
 }
 export interface OrderDto extends CreateOrderDto {
   uuid: String;
-  status: OrderStatus;
+  status: String;
 }
 export class OrderStatusDto {
   status: String;
+  canPoll: Boolean;
 }
 

@@ -45,6 +45,7 @@ export class OrderController {
       );
       this.pollingService.publish(`order:status:${createdOrder.uuid}`, {
         status: createdOrder.status,
+        canPoll: this.canPoll(createdOrder.status)
       });
       logger.log('Order status updated to ' + createdOrder.status);
     };
@@ -96,7 +97,11 @@ export class OrderController {
       if (order === null) {
         throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);
       }
-      response.send({ status: order.status });
+      response.send({ status: order.status, canPoll: this.canPoll(order.status)  });
     }
+  }
+
+  canPoll(status: String): boolean {
+    return status !== 'DELIVERED' && status !== 'CANCELLED';
   }
 }
