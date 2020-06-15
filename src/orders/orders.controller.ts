@@ -9,7 +9,7 @@ export class OrdersController {
 
   @Get()
   async getOrders(): Promise<Orders> {
-    let orders = await this.ordersService.findAll();
+    const orders = await this.ordersService.findAll();
     return orders;
   }
 }

@@ -1,20 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { OrderStatus } from 'src/status/status.enum';
 
 @Schema()
 class OrderItem extends Document {
   @Prop()
-  itemId: String;
+  itemId: string;
 
   @Prop()
-  price: Number;
+  price: number;
 }
 
 @Schema()
 export class Order extends Document {
   @Prop()
-  uuid: String;
+  uuid: string;
 
   @Prop()
   items: OrderItem[];
@@ -23,15 +22,15 @@ export class Order extends Document {
   createdDate: Date;
   
   @Prop()
-  createdBy: String;
+  createdBy: string;
   
   @Prop()
-  createdById: String;
+  createdById: string;
   
   @Prop({
     enum: ['CREATED', 'CONFIRMED', 'DELIVERED', 'CANCELLED']
   })
-  status: String;
+  status: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

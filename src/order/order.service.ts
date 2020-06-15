@@ -19,12 +19,12 @@ export class OrderService {
     return createdOrder.save({ validateBeforeSave: true });
   }
 
-  async find(orderUuid: String): Promise<OrderDto> {
+  async find(orderUuid: string): Promise<OrderDto> {
     const foundOrder = this.orderModel.findOne({ uuid: orderUuid });
     return foundOrder;
   }
 
-  async updateStatus(orderUuid: String, status: OrderStatus): Promise<OrderDto> {
+  async updateStatus(orderUuid: string, status: OrderStatus): Promise<OrderDto> {
     const order = await this.orderModel.findOne({ uuid: orderUuid });
     if (order === null) {
       return null;

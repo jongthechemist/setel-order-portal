@@ -1,5 +1,5 @@
 import { PollingResponse, PollingRequest } from '../polling/polling.interface';
 
-export interface OrderResponse<T> extends PollingResponse<T> {}
+export type OrderResponse<T> = PollingResponse<T>
 
-export interface OrderRequest extends PollingRequest {}
+export type OrderRequest = PollingRequest

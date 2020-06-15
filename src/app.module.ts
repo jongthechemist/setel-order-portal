@@ -17,10 +17,9 @@ import { PollingService } from './polling/polling.service';
       useFactory: (
         configService: ConfigService,
       ): MongooseModuleOptions => {
-        const domain = configService.get<string>('DATABASE_DOMAIN');
-        const port = configService.get<string>('DATABASE_PORT');
-        const name = configService.get<string>('DATABASE_NAME');
-        return { uri: `${domain}:${port}/${name}` };
+        const connection = configService.get<string>('MONGO_CONNECTION');
+        Logger.log('COnnecting to mongo atlas at', connection)
+        return { uri: connection }
       },
       inject: [ConfigService],
     }),

@@ -5,8 +5,8 @@ import { DeliveryModule } from '../delivery/delivery.module';
 import { OrderService } from './order.service';
 import { PollingService } from '../polling/polling.service';
 import { CreateOrderDto, OrderDto } from './order.dto';
-import { Order, OrderSchema } from './order.schema';
-import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { Order } from './order.schema';
+import { getModelToken } from '@nestjs/mongoose';
 import { MockOrder } from './order.service.spec';
 import { PaymentService } from '../payment/payment.service';
 import { DeliveryService } from '../delivery/delivery.service';
@@ -80,7 +80,7 @@ describe('Order Controller', () => {
   it('should create order with uuid', async () => {
     expect.assertions(1);
     const mockResponse = { send: jest.fn() };
-    await controller.createOrder(orderDto, mockResponse);
+    await controller.createOrder(createOrderDto, mockResponse);
     expect(mockResponse.send).toBeCalledWith(orderDto);
   });
 
@@ -128,7 +128,7 @@ describe('Order Controller', () => {
     expect.assertions(2);
     jest.spyOn(orderService, 'find').mockResolvedValue(null);
     try {
-      const order = await controller.getOrder('abcd');
+      await controller.getOrder('abcd');
     } catch (error) {
       expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(HttpStatus.NOT_FOUND);
@@ -144,19 +144,17 @@ describe('Order Controller', () => {
   it('should return order status', async () => {
     expect.assertions(1);
     await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
-    expect(mockResponse.send).toHaveBeenCalledWith({ status: 'CREATED', canPoll: controller.canPoll('CREATED') });
+    expect(mockResponse.send).toHaveBeenCalledWith({
+      status: 'CREATED',
+      canPoll: controller.canPoll('CREATED'),
+    });
   });
 
   it('should throw error not found on get status if order not found', async () => {
     expect.assertions(2);
     jest.spyOn(orderService, 'find').mockResolvedValue(null);
     try {
-      const order = await controller.getStatus(
-        'abcd',
-        'false',
-        mockRequest,
-        mockResponse,
-      );
+      await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
     } catch (error) {
       expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(HttpStatus.NOT_FOUND);
@@ -181,7 +179,7 @@ describe('Order Controller', () => {
       DELIVERED: false,
       CANCELLED: false,
     };
-    for (let status in expectedResults) {
+    for (const status in expectedResults) {
       expect(controller.canPoll(status)).toBe(expectedResults[status]);
     }
   });

@@ -7,10 +7,10 @@ class MockOrder {
   constructor(public data?: any) {
     MockOrder.data = data;
   }
-  static find(filter: any): any {
+  static find(): any {
     return [MockOrder.data];
   }
-  static sort(order: any): any {
+  static sort(): any {
     return [MockOrder.data];
   }
 }

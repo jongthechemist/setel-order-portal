@@ -10,23 +10,23 @@ export class MockOrder {
     data.save = this.save;
     MockOrder.data = data;
   }
-  get status(): String {
+  get status(): string {
     return this.data.status;
   }
-  set status(value: String) {
+  set status(value: string) {
     this.data.status = value;
   }
-  get uuid(): String {
+  get uuid(): string {
     return this.data.uuid;
   }
-  set uuid(value: String) {
+  set uuid(value: string) {
     this.data.uuid = value;
   }
-  save(options: any) {
-    return this.data;
+  save(): any {
+    return MockOrder.data;
   }
-  static findOne(filter: any): any {
-    return new MockOrder(MockOrder.data);
+  static findOne(): any {
+    return MockOrder.data;
   }
 }
 
@@ -80,17 +80,21 @@ describe('OrderService', () => {
   });
 
   it('should update order status', async () => {
-    await expect(
-      service.updateStatus('abcd', 'CONFIRMED'),
-    ).resolves.toHaveProperty('status', 'CONFIRMED');
-    await expect(
-      service.updateStatus('abcd', 'CANCELLED'),
-    ).resolves.toHaveProperty('status', 'CANCELLED');
-    await expect(
-      service.updateStatus('abcd', 'DELIVERED'),
-    ).resolves.toHaveProperty('status', 'DELIVERED');
+    expect.assertions(3);
+    const confirmed = await service.updateStatus('abcd', 'CONFIRMED');
+    expect(confirmed).toHaveProperty('status', 'CONFIRMED');
+    const delivered = await service.updateStatus('abcd', 'DELIVERED');
+    expect(delivered).toHaveProperty('status', 'DELIVERED');
+    const cancelled = await service.updateStatus('abcd', 'CANCELLED');
+    expect(cancelled).toHaveProperty('status', 'CANCELLED');
   });
   
+  it('should not update order once status is cancelled', async () => {
+    expect.assertions(1);
+    await service.updateStatus('abcd', 'CANCELLED');
+    const confirmed = await service.updateStatus('abcd', 'CONFIRMED');
+    expect(confirmed).toHaveProperty('status', 'CANCELLED');
+  });
 
   it('should not update status if order not found', async () => {
     expect.assertions(2);
@@ -100,5 +104,4 @@ describe('OrderService', () => {
     expect(result).toBeNull();
     expect(MockOrder.data.save).not.toBeCalled();
   });
-
 });

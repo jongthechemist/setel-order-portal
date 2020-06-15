@@ -65,8 +65,8 @@ export class OrderController {
   }
 
   @Get(':id')
-  async getOrder(@Param('id') orderUuid: String): Promise<OrderDto> {
-    let order = await this.orderService.find(orderUuid);
+  async getOrder(@Param('id') orderUuid: string): Promise<OrderDto> {
+    const order = await this.orderService.find(orderUuid);
     if (order === null) {
       throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);
     }
@@ -74,8 +74,8 @@ export class OrderController {
   }
 
   @Put(':id/cancel')
-  async cancelOrder(@Param('id') orderUuid: String): Promise<OrderDto> {
-    let order = await this.orderService.updateStatus(orderUuid, 'CANCELLED');
+  async cancelOrder(@Param('id') orderUuid: string): Promise<OrderDto> {
+    const order = await this.orderService.updateStatus(orderUuid, 'CANCELLED');
     this.pollingService.publish(`order:status:${order.uuid}`, {
       status: order.status,
       canPoll: this.canPoll(order.status)
@@ -85,12 +85,12 @@ export class OrderController {
 
   @Get(':id/status')
   async getStatus(
-    @Param('id') orderUuid: String,
+    @Param('id') orderUuid: string,
     @Query('polling') polling: 'true' | 'false',
     @Req() request: OrderRequest,
     @Res() response: OrderResponse<OrderStatusDto>,
   ): Promise<void> {
-    let order = await this.orderService.find(orderUuid);
+    const order = await this.orderService.find(orderUuid);
     if (polling === 'true' && this.canPoll(order.status)) {
       this.pollingService.subscribe(
         `order:status:${orderUuid}`,
@@ -105,7 +105,7 @@ export class OrderController {
     }
   }
 
-  canPoll(status: String): boolean {
+  canPoll(status: string): boolean {
     return status !== 'DELIVERED' && status !== 'CANCELLED';
   }
 }

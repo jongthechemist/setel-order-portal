@@ -1,9 +1,9 @@
 export class PaymentRequestDto {
-  token?: String;
-  secret?: String;
+  token?: string;
+  secret?: string;
   data?: any;
 }
 export class PaymentResponseDto {
-  orderUuid: String;
+  orderUuid: string;
   status: "DECLINED" | "CONFIRMED"
 }

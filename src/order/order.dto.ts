@@ -1,18 +1,15 @@
-import { OrderStatus } from 'src/status/status.enum';
-
-
 export interface CreateOrderDto {
-  items: { itemId: String, price: Number }[];
+  items: { itemId: string, price: number }[];
   createdDate: Date;
-  createdBy: String;
-  createdById: String;
+  createdBy: string;
+  createdById: string;
 }
 export interface OrderDto extends CreateOrderDto {
-  uuid: String;
-  status: String;
+  uuid: string;
+  status: string;
 }
 export class OrderStatusDto {
-  status: String;
-  canPoll: Boolean;
+  status: string;
+  canPoll: boolean;
 }
 

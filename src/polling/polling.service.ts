@@ -3,17 +3,17 @@ import { PollingResponse, PollingRequest } from './polling.interface';
 
 @Injectable()
 export class PollingService {
-  subscribers: Map<String, Array<PollingResponse<any>>>;
+  subscribers: Map<string, Array<PollingResponse<any>>>;
 
   constructor() {
-    this.subscribers = new Map<String, Array<PollingResponse<any>>>();
+    this.subscribers = new Map<string, Array<PollingResponse<any>>>();
   }
 
   subscribe<T>(
-    topic: String,
+    topic: string,
     request: PollingRequest,
     response: PollingResponse<T>,
-  ) {
+  ): void {
     let subscribers = this.subscribers.get(topic);
     if (!subscribers) {
       subscribers = new Array<PollingResponse<T>>();
@@ -26,10 +26,10 @@ export class PollingService {
     });
   }
 
-  publish<T>(topic: String, body: T) {
+  publish<T>(topic: string, body: T): void {
     let subscribers = this.subscribers.get(topic);
     if (subscribers) {
-      for (let subscriber of subscribers) {
+      for (const subscriber of subscribers) {
         subscriber.send(body);
       }
       subscribers = new Array<PollingResponse<T>>();

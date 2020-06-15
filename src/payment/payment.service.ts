@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentResponseDto, PaymentRequestDto } from './payment.dto';
 import {
   Transport,
-  ClientProxy,
   ClientProxyFactory,
 } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
@@ -24,8 +23,9 @@ export class PaymentService {
     });
   }
 
-  async create(orderId: String, token?: String): Promise<PaymentResponseDto> {
-    let response = await this.client
+  async create(orderId: string, token?: string): Promise<PaymentResponseDto> {
+    Logger.log('calling payment service', 'PaymentService')
+    const response = await this.client
       .send<PaymentResponseDto, PaymentRequestDto>(
         { cmd: 'create' },
         {
@@ -35,6 +35,7 @@ export class PaymentService {
         },
       )
       .toPromise();
+    Logger.log('success calling payment service', 'PaymentService')
     return response;
   }
 }
