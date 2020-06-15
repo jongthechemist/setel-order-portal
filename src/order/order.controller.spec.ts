@@ -18,7 +18,6 @@ describe('Order Controller', () => {
   let orderService: OrderService;
   let paymentService: PaymentService;
   let deliveryService: DeliveryService;
-  let pollingService: PollingService;
 
   const orderDto: OrderDto = {
     uuid: 'abcd',
@@ -38,7 +37,6 @@ describe('Order Controller', () => {
     orderUuid: 'abcd',
     status: 'CONFIRMED',
   };
-  const mockRequest = { on: jest.fn() };
   const mockResponse = { send: jest.fn() };
 
   beforeEach(async () => {
@@ -59,7 +57,6 @@ describe('Order Controller', () => {
     orderService = module.get<OrderService>(OrderService);
     paymentService = module.get<PaymentService>(PaymentService);
     deliveryService = module.get<DeliveryService>(DeliveryService);
-    pollingService = module.get<PollingService>(PollingService);
 
     jest.spyOn(orderService, 'create').mockResolvedValue(orderDto);
     jest.spyOn(orderService, 'find').mockResolvedValue(orderDto);
@@ -136,7 +133,7 @@ describe('Order Controller', () => {
 
   it('should return order status', async () => {
     expect.assertions(1);
-    await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
+    await controller.getStatus('abcd', 'false', mockResponse);
     expect(mockResponse.send).toHaveBeenCalledWith({
       status: 'CREATED',
       canPoll: controller.canPoll('CREATED'),
@@ -147,7 +144,7 @@ describe('Order Controller', () => {
     expect.assertions(2);
     jest.spyOn(orderService, 'find').mockResolvedValue(null);
     try {
-      await controller.getStatus('abcd', 'false', mockRequest, mockResponse);
+      await controller.getStatus('abcd', 'false', mockResponse);
     } catch (error) {
       expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(HttpStatus.NOT_FOUND);

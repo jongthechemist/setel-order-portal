@@ -1,8 +1,6 @@
 import { Injectable, Logger, HttpService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PaymentResponseDto, PaymentRequestDto } from './payment.dto';
-import { Transport, ClientProxyFactory } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+import { PaymentResponseDto } from './payment.dto';
 
 @Injectable()
 export class PaymentService {
@@ -29,7 +27,7 @@ export class PaymentService {
       .then(response => {
         return response.data;
       })
-      .catch(e => {
+      .catch(() => {
         throw new Error('Failed to call payment service');
       });
     Logger.log('success calling payment service', 'PaymentService');

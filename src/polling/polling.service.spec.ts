@@ -18,7 +18,7 @@ describe('PollingService', () => {
 
   it('should resolve when compare function returns true', async () => {
     expect.assertions(1)
-    let originalResult = 'a'
+    const originalResult = 'a'
 
     let newResult = 'a'
     setTimeout(() => newResult = 'b', 1000)
@@ -34,7 +34,7 @@ describe('PollingService', () => {
 
   it('should not resolve when result compare function returns false longer than interval * maxPoll', async () => {
     expect.assertions(1)
-    let originalResult = 'a'
+    const originalResult = 'a'
 
     let newResult = 'a'
     setTimeout(() => newResult = 'b', 1000)

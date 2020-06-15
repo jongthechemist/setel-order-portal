@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
 import { ConfigService } from '@nestjs/config';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { PaymentResponseDto } from './payment.dto';
 import { HttpModule, HttpService } from '@nestjs/common';
 

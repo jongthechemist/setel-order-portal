@@ -7,7 +7,6 @@ import {
   HttpException,
   HttpStatus,
   Query,
-  Req,
   Res,
   Logger,
   Put,
@@ -17,7 +16,7 @@ import { OrderStatus } from '../status/status.enum';
 import { PaymentService } from '../payment/payment.service';
 import { DeliveryService } from '../delivery/delivery.service';
 import { PollingService } from '../polling/polling.service';
-import { OrderResponse, OrderRequest } from './order.interface';
+import { OrderResponse } from './order.interface';
 import { CreateOrderDto, OrderStatusDto, OrderDto } from './order.dto';
 
 const logger = new Logger('OrderController');
@@ -79,7 +78,6 @@ export class OrderController {
   async getStatus(
     @Param('id') orderUuid: string,
     @Query('polling') polling: 'true' | 'false',
-    @Req() request: OrderRequest,
     @Res() response: OrderResponse<OrderStatusDto>,
   ): Promise<void> {
     const order = await this.orderService.find(orderUuid);
