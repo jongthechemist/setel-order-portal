@@ -43,10 +43,6 @@ export class OrderController {
         createdOrder.uuid,
         orderStatus,
       );
-      this.pollingService.publish(`order:status:${createdOrder.uuid}`, {
-        status: createdOrder.status,
-        canPoll: this.canPoll(createdOrder.status)
-      });
       logger.log('Order status updated to ' + createdOrder.status);
     };
 
@@ -76,10 +72,6 @@ export class OrderController {
   @Put(':id/cancel')
   async cancelOrder(@Param('id') orderUuid: string): Promise<OrderDto> {
     const order = await this.orderService.updateStatus(orderUuid, 'CANCELLED');
-    this.pollingService.publish(`order:status:${order.uuid}`, {
-      status: order.status,
-      canPoll: this.canPoll(order.status)
-    });
     return order;
   }
 
@@ -92,11 +84,12 @@ export class OrderController {
   ): Promise<void> {
     const order = await this.orderService.find(orderUuid);
     if (polling === 'true' && this.canPoll(order.status)) {
-      this.pollingService.subscribe(
-        `order:status:${orderUuid}`,
-        request,
-        response,
+      const polledOrder = await this.pollingService.subscribe(
+        () => this.orderService.find(orderUuid),
+        (newOrder) => order.status !== newOrder.status,
+        5000
       );
+      response.send({ status: polledOrder.status, canPoll: this.canPoll(order.status)  });
     } else {
       if (order === null) {
         throw new HttpException('Order not found.', HttpStatus.NOT_FOUND);

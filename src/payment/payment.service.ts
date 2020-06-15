@@ -1,41 +1,38 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentResponseDto, PaymentRequestDto } from './payment.dto';
-import {
-  Transport,
-  ClientProxyFactory,
-} from '@nestjs/microservices';
+import { Transport, ClientProxyFactory } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class PaymentService {
-  client: {
-    send<TResult, TInput>(pattern: any, data: any): Observable<TResult>;
-  };
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {}
 
-  constructor(private readonly configService: ConfigService) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: configService.get<string>('PAYMENT_HOST'),
-        port: configService.get<number>('PAYMENT_PORT'),
-      },
-    });
-  }
-
-  async create(orderId: string, token?: string): Promise<PaymentResponseDto> {
-    Logger.log('calling payment service', 'PaymentService')
-    const response = await this.client
-      .send<PaymentResponseDto, PaymentRequestDto>(
-        { cmd: 'create' },
+  async create(orderUuid: string, token?: string): Promise<PaymentResponseDto> {
+    Logger.log('calling payment service', 'PaymentService');
+    const url = this.configService.get<string>('PAYMENT_API');
+    const auth = this.configService.get<string>('PAYMENT_AUTHORIZATION');
+    const response = await this.httpService
+      .post(
+        `${url}/${orderUuid}`,
+        {},
         {
-          secret: this.configService.get<string>('PAYMENT_SECRET'),
-          token: token,
-          data: orderId,
+          headers: {
+            Authorization: auth || token,
+          },
         },
       )
-      .toPromise();
-    Logger.log('success calling payment service', 'PaymentService')
+      .toPromise()
+      .then(response => {
+        return response.data;
+      })
+      .catch(e => {
+        throw new Error('Failed to call payment service');
+      });
+    Logger.log('success calling payment service', 'PaymentService');
     return response;
   }
 }

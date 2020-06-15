@@ -111,13 +111,6 @@ describe('Order Controller', () => {
     expect(orderService.updateStatus).toHaveBeenCalledWith('abcd', 'DELIVERED');
   });
 
-  it('should publish status update to polling service', async () => {
-    expect.assertions(1);
-    jest.spyOn(pollingService, 'publish');
-    await controller.createOrder(orderDto, mockResponse);
-    expect(pollingService.publish).toHaveBeenCalled();
-  });
-
   it('should return order if found', async () => {
     expect.assertions(1);
     const order = await controller.getOrder('abcd');
@@ -159,17 +152,6 @@ describe('Order Controller', () => {
       expect(error).toBeInstanceOf(HttpException);
       expect(error.status).toBe(HttpStatus.NOT_FOUND);
     }
-  });
-
-  it('should poll order status if polling param is true', async () => {
-    expect.assertions(1);
-    jest.spyOn(pollingService, 'subscribe');
-    await controller.getStatus('abcd', 'true', mockRequest, mockResponse);
-    expect(pollingService.subscribe).toHaveBeenCalledWith(
-      `order:status:abcd`,
-      mockRequest,
-      mockResponse,
-    );
   });
 
   it('should return with canPoll = true if status can be polled', () => {

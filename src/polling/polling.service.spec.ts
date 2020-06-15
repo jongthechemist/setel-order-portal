@@ -4,9 +4,6 @@ import { PollingService } from './polling.service';
 describe('PollingService', () => {
   let service: PollingService;
 
-  const mockRequest = { on: jest.fn() };
-  const mockResponse = { send: jest.fn() };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PollingService],
@@ -18,40 +15,39 @@ describe('PollingService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  
-  it('should define subscribers of different topics', () => {
-    service.subscribe('abcd', mockRequest, mockResponse);
-    service.subscribe('defg', mockRequest, mockResponse);
 
-    expect(service.subscribers.get('abcd')).toBeDefined();
-    expect(service.subscribers.get('defg')).toBeDefined();
+  it('should resolve when compare function returns true', async () => {
+    expect.assertions(1)
+    let originalResult = 'a'
+
+    let newResult = 'a'
+    setTimeout(() => newResult = 'b', 1000)
+    const getResult = jest.fn(() => {
+      return new Promise((resolve) => resolve(newResult))
+    })
+    const compareFn = jest.fn((res) => res !== originalResult)
+
+    const latestResult = await service.subscribe(getResult, compareFn);
+    
+    expect(latestResult).toBe('b');
   });
 
-  it('should add subscription', () => {
-    service.subscribe('abcd', mockRequest, mockResponse);
-    expect(service.subscribers.get('abcd')).toContain(mockResponse);
-  });
+  it('should not resolve when result compare function returns false longer than interval * maxPoll', async () => {
+    expect.assertions(1)
+    let originalResult = 'a'
 
-  it('should remove subscription on request close', done => {
-    expect.assertions(2);
+    let newResult = 'a'
+    setTimeout(() => newResult = 'b', 1000)
+    const getResult = jest.fn(() => {
+      return new Promise((resolve) => resolve(newResult))
+    })
+    const compareFn = jest.fn((res) => res !== originalResult)
 
-    const mockRequestOn = (event, callback) => {
-      setTimeout(() => {
-        callback();
-        expect(service.subscribers.get('abcd')).not.toContain(mockResponse);
-        done();
-      }, 1000);
-    };
-
-    jest.spyOn(mockRequest, 'on').mockImplementation(mockRequestOn);
-    service.subscribe('abcd', mockRequest, mockResponse);
-    expect(service.subscribers.get('abcd')).toBeDefined();
-  });
-
-  it('should publish to subscribers', () => {
-    jest.spyOn(mockResponse, 'send');
-    service.subscribe('abcd', mockRequest, mockResponse);
-    service.publish('abcd', '1234');
-    expect(mockResponse.send).toBeCalledWith('1234');
+    try {
+      await service.subscribe(getResult, compareFn, 50, 10);
+    } catch(e) {
+      expect(e).toBeDefined();
+    }
+   
   });
 });

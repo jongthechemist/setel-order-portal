@@ -18,7 +18,7 @@ import { PollingService } from './polling/polling.service';
         configService: ConfigService,
       ): MongooseModuleOptions => {
         const connection = configService.get<string>('MONGO_CONNECTION');
-        Logger.log('COnnecting to mongo atlas at', connection)
+        Logger.log('Connecting to mongo atlas at ' + connection, 'AppModule')
         return { uri: connection }
       },
       inject: [ConfigService],
@@ -26,7 +26,7 @@ import { PollingService } from './polling/polling.service';
     OrderModule,
     OrdersModule,
     PaymentModule,
-    DeliveryModule,
+    DeliveryModule
   ],
   controllers: [AppController],
   providers: [AppService, PollingService],

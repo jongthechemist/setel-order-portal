@@ -1,5 +1,7 @@
-import { PollingResponse, PollingRequest } from '../polling/polling.interface';
+export interface OrderResponse<T> {
+  send(response: T): void;
+}
 
-export type OrderResponse<T> = PollingResponse<T>
-
-export type OrderRequest = PollingRequest
+export interface OrderRequest {
+  on(event: 'close', callback: () => void): void;
+}
