@@ -1,4 +1,4 @@
-# SetelPaymentPortal
+# SetelOrderPortal
 
 This project is for a technical assigment for Setel Full Stack Engineer. It is deployed to Firebase as Cloud Function and can be found here: https://us-central1-setel-order-portal.cloudfunctions.net/api
 
